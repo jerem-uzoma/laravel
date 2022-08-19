@@ -17,6 +17,6 @@ docker build -f .docker/Dockerfile -t test .
 
 To build the pipeline:
 
-Add a gitlab runner to your env and assign an instance role to this runner with ecr access.
+Add a gitlab runner to your env and assign an instance role to this runner with ecr and eks access.
 
-
+Add an env variable for your ECR registry named ECR_REGISTRY_IMAGE_URI

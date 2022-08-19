@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: Laravel-app
+    labels:
+        stack: Laravel-app
+spec:
+    strategy:
+        rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 50%
+    selector:
+        matchLabels:
+            app: Laravel-app
+    template:
+        metadata:
+            labels:
+                stack: Laravel-app
+                app: Laravel-app
+        spec:
+            securityContext:
+                runAsUser: 1000
+                runAsGroup: 3000
+                fsGroup: 2000
+            containers:
+                - name: Laravel-app
+                  image: $docker_sha_tag
+                  securityContext:
+                      readOnlyRootFilesystem: true
+                      allowPrivilegeEscalation: false
+                  resources:
+                      limits:
+                          memory: "500Mi"
+                          cpu: "50m"
+                      requests:
+                          memory: "300Mi"
+                          cpu: "25m"
+                  ports:
+                      - containerPort: 80
+                  readinessProbe:
+                      httpGet:
+                          path: /
+                          port: 80
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  livenessProbe:
+                      httpGet:
+                          path: /
+                          port: 80
+                      initialDelaySeconds: 200
+                      periodSeconds: 20
+                      failureThreshold: 12
+                      timeoutSeconds: 5
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+    name: Laravel-app
+    labels:
+        stack: Laravel-app
+spec:
+    scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: Laravel-app
+    minReplicas: 2
+    maxReplicas: 15
+    metrics:
+        - type: Resource
+          resource:
+              name: cpu
+              targetAverageUtilization: 60
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: Laravel-app
+    labels:
+        stack: Laravel-app
+spec:
+    selector:
+        app: Laravel-app
+    ports:
+        - name: web
+          port: 80
+          targetPort: 80
+          protocol: TCP

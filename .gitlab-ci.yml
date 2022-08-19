@@ -3,7 +3,6 @@ stages:
   - build
   - deploy
 
-
 variables:
   SECURE_ANALYZERS_PREFIX: "$CI_TEMPLATE_REGISTRY_HOST/security-products"
   SAST_IMAGE_SUFFIX: ""
@@ -81,3 +80,15 @@ dockerize:
   only:
     - master
 
+eks-deploy:
+  stage: deploy
+  variables:
+    DOCKER_SHA_TAG: ${ECR_REGISTRY_IMAGE_URI}/Laravel-${CI_COMMIT_BRANCH}:${CI_COMMIT_SHORT_SHA}
+    AWS_REGION: ${AWS_REGION}
+    EKS_CLUSTER_NAME: ${EKS_CLUSTER_NAME}
+  images: bearengineer/awscli-kubectl:latest
+  script:
+    - aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
+    - kubectl apply -f .docker/deployment.yaml
+  only:
+    - master
