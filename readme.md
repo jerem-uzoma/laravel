@@ -10,3 +10,7 @@ composer update
 mv .env.example .env
 php artisan key:generate
 ```
+
+To dockerize run the command:
+
+docker build -f .docker/Dockerfile -t test .
