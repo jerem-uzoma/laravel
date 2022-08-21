@@ -45,10 +45,16 @@ phpcs-security-audit-sast:
     - if: $CI_COMMIT_BRANCH
       exists:
         - '**/*.php'
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+
 
 .dockerize-setup: &dockerize-setup
   - apk add --no-cache curl jq python3 py3-pip
   - pip install awscli
+  - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+  - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+  - export AWS_DEFAULT_REGION=us-west-2
   - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY_IMAGE_URI
 
 .dockerize-check-exists: &dockerize-check-exists
