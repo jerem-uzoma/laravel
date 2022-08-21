@@ -54,8 +54,8 @@ phpcs-security-audit-sast:
   - pip install awscli
   - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
   - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-  - export AWS_DEFAULT_REGION=us-west-2
-  - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY_IMAGE_URI
+  - export AWS_DEFAULT_REGION=$AWS_REGION
+  - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY_IMAGE_URI
 
 .dockerize-check-exists: &dockerize-check-exists
   - EXISTING=$(aws ecr describe-images --repository-name "$DOCKER_REPOSITORY" --image-ids=imageTag=${CI_COMMIT_SHORT_SHA} | jq '.imageDetails[0].imageTags[0]' -r) || true
